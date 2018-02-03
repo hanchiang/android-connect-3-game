@@ -11,6 +11,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     val DROP_IN_DELAY: Long = 200L
+    var messageToast: Toast? = null
+
     // 0 = yellow, 1 = red, 2 = empty
     var playerTurn = 0
     var gameState = mutableListOf<Int>(2, 2, 2, 2, 2, 2, 2, 2, 2)
@@ -20,6 +22,14 @@ class MainActivity : AppCompatActivity() {
             mutableListOf(0, 4, 8), mutableListOf(2, 4, 6))
     var isWinnerFound: Boolean = false; var isGameover: Boolean = false
     var winner: Int = 2; var isGameOver: Boolean = false
+
+    fun playAgain(view: View) {
+        init()
+        messageToast?.cancel()
+        winnerText.setText("")
+        winnerText.setVisibility(View.INVISIBLE)
+        playAgainButton.setVisibility(View.INVISIBLE)
+    }
 
     fun init() {
         // 0 = yellow, 1 = red, 2 = empty
@@ -41,6 +51,7 @@ class MainActivity : AppCompatActivity() {
     fun checkWinnerFound(): Boolean {
         for (row in winningPositions) {
             if (gameState[row[0]] == gameState[row[1]] && gameState[row[1]] == gameState[row[2]] && gameState[row[2]] != 2) {
+                winner = if (gameState[row[0]] == 0) 0 else 1
                 isGameOver = true
                 return true
             }
@@ -79,7 +90,6 @@ class MainActivity : AppCompatActivity() {
 
             var message: String = ""
             if (checkWinnerFound()) {
-                winner = if (playerTurn == 0) 1 else 0
                 message = "Player $winner is the winner!"
             } else if (checkGameOver()) {
                 message = "It's a draw!"
@@ -87,7 +97,8 @@ class MainActivity : AppCompatActivity() {
             if (isGameOver) {
                 Log.i("Info", message)
                 Handler().postDelayed({
-                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                    messageToast = Toast.makeText(this, message, Toast.LENGTH_LONG)
+                    messageToast?.show()
                     winnerText.setText(message)
                     winnerText.setVisibility(View.VISIBLE)
                     playAgainButton.setVisibility(View.VISIBLE)
@@ -100,12 +111,5 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        playAgainButton.setOnClickListener {
-            init()
-            winnerText.setText("")
-            winnerText.setVisibility(View.INVISIBLE)
-            playAgainButton.setVisibility(View.INVISIBLE)
-        }
     }
 }
